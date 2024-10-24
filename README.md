@@ -1,0 +1,2 @@
+# Servify-Backend
+RAG CHATBOT FOR SERVICE DISCOVERY
