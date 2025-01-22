@@ -1,0 +1,18 @@
+app/
+    __pycache__/
+    services/
+        __pycache__/
+        guided_search.py
+        semantic_search.py
+        syntactic_search.py
+    utils/
+        __pycache__/
+        file_utils.py
+        logging_utils.py
+        __init__.py
+    main.py
+    data/
+        servio_data.json
+    requirements.txt
+    run.py
+    vercel.json
