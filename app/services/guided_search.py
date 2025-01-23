@@ -5,7 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from nltk.corpus import wordnet
 
 service_registry = []
-with open("/content/servio_data.json", "r") as f:
+with open("servio_data.json", "r") as f:
     for line in f:
         try:
             # Attempt to parse each line as a JSON object
@@ -39,11 +39,19 @@ def embed_text(text, tokenizer, model):
 def retrieve_service(query, service_registry, tokenizer, model):
     expanded_query = expand_query(query)
     query_embedding = embed_text(expanded_query, tokenizer, model)
-    registry_embeddings = [embed_text(service['docstring'], tokenizer, model) for service in service_registry]
+    registry_embeddings = [
+        embed_text(service.get("docstring", ""), tokenizer, model)
+        for service in service_registry
+    ]
     similarities = [cosine_similarity(query_embedding, emb)[0][0] for emb in registry_embeddings]
     best_match_idx = similarities.index(max(similarities))
     best_service = service_registry[best_match_idx]
-    return best_service['func_name'], best_service['url'], best_service['docstring']
+
+    func_name = best_service.get("func_name", "Unknown")
+    url = best_service.get("url", "Unknown")
+    docstring = best_service.get("docstring", "No description available.")
+    return func_name, url, docstring
+
 
 def chatbot():
     tokenizer, model = load_model()

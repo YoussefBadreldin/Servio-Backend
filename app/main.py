@@ -71,12 +71,17 @@ def retrieve_service(query, service_registry, tokenizer, model):
     expanded_query = expand_query(query)
     query_embedding = embed_text(expanded_query, tokenizer, model)
     registry_embeddings = [
-        embed_text(service["docstring"], tokenizer, model) for service in service_registry
+        embed_text(service.get("docstring", ""), tokenizer, model)
+        for service in service_registry
     ]
     similarities = [cosine_similarity(query_embedding, emb)[0][0] for emb in registry_embeddings]
     best_match_idx = similarities.index(max(similarities))
     best_service = service_registry[best_match_idx]
-    return best_service["func_name"], best_service["url"], best_service["docstring"]
+
+    func_name = best_service.get("func_name", "Unknown")
+    url = best_service.get("url", "Unknown")
+    docstring = best_service.get("docstring", "No description available.")
+    return func_name, url, docstring
 
 # Combined Search API for POST and OPTIONS
 @app.api_route("/search", methods=["POST", "OPTIONS"])
@@ -120,7 +125,7 @@ def search_api(
     for result in results:
         formatted_results.append(
             {
-                "function_name": result.get("func_name", "Unknown"),
+                "function_name": result.get("function_name", result.get("func_name", "Unknown")),  # Check both keys
                 "url": result.get("url", "Unknown"),
                 "docstring": result.get("docstring", "No docstring available"),
             }
