@@ -2,12 +2,12 @@ fastapi==0.95.2
 uvicorn==0.22.0
 python-multipart==0.0.6
 python-dotenv==1.0.0
+pydantic==1.10.7
 nltk==3.8.1
 wordnet==1.2
-pytesseract==0.3.10
-pillow==10.0.0
+github3.py==4.0.1
 langchain==0.0.240
 faiss-cpu==1.7.4
 sentence-transformers==2.2.2
-github3.py==4.0.1
-requests==2.31.0
+pytesseract==0.3.10
+pillow==10.0.0

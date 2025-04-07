@@ -1,30 +1,20 @@
-from typing import List, Dict, Optional
-from pydantic import BaseModel
+from fastapi import HTTPException, Request
+from fastapi.responses import JSONResponse
+from typing import Any, Dict
 
-class AspectDefinition(BaseModel):
-    key: str
-    value: str
+class ServiceException(HTTPException):
+    def __init__(self, status_code: int, detail: Any = None):
+        super().__init__(status_code=status_code, detail=detail)
 
-class ServiceMatch(BaseModel):
-    func_name: str
-    repo: str
-    path: str
-    docstring: str
-    url: str
-    score: float
+async def http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "error": exc.detail,
+            "path": request.url.path
+        }
+    )
 
-class AspectMatchResult(BaseModel):
-    aspect_key: str
-    aspect_value: str
-    matches: List[ServiceMatch]
-    min_threshold: float
-
-class OverallMatchResult(BaseModel):
-    query: str
-    matches: List[ServiceMatch]
-    aspects_used: List[str]
-    min_threshold: float
-
-class XmlGenerationRequest(BaseModel):
-    aspects: List[AspectDefinition]
-    output_path: Optional[str] = "generated_aspects.xml"
+def include_exception_handlers(app):
+    app.add_exception_handler(HTTPException, http_exception_handler)

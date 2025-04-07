@@ -1,5 +1,9 @@
-from typing import List
 from pydantic import BaseModel
+from typing import List, Optional
+
+class SearchQuery(BaseModel):
+    query: str
+    expand_query: bool = True
 
 class ServiceRecommendation(BaseModel):
     service_name: str
@@ -7,12 +11,7 @@ class ServiceRecommendation(BaseModel):
     description: str
     url: str
 
-class RecommendationResponse(BaseModel):
-    explanation: str
-    recommendations: List[ServiceRecommendation]
-
-class UMLProcessingRequest(BaseModel):
-    image_path: str
-
-class UMLProcessingResponse(BaseModel):
-    plantuml_code: str
+class UploadResponse(BaseModel):
+    success: bool
+    message: str
+    records_processed: Optional[int] = None
