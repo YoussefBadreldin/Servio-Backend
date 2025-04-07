@@ -7,7 +7,7 @@ import nltk
 from nltk.corpus import wordnet as wn
 from pathlib import Path
 
-from .models import AspectDefinition, ServiceMatch, AspectMatchResult, OverallMatchResult
+from .exceptions import AspectDefinition, ServiceMatch, AspectMatchResult, OverallMatchResult
 
 class DirectParallel:
     def __init__(self):

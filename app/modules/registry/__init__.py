@@ -1,4 +1,4 @@
-from .core import RegistryBuilder
+from .api import RegistryBuilder
 from .models import (
     GitHubRepository,
     RegistryBuildRequest,

@@ -1,5 +1,5 @@
-from .core import DirectParallel
-from .models import (
+from .dependencies import DirectParallel
+from .exceptions import (
     AspectDefinition,
     ServiceMatch,
     AspectMatchResult,
