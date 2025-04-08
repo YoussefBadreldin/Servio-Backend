@@ -8,7 +8,7 @@ from .models import DirectRequest, DirectResponse, AspectMatch  # This import mu
 
 class DirectProcessor:
     def __init__(self):
-        self.registry_file = "app/data/servio_data.json"
+        self.registry_file = "app/data/service_registry.json"
         self.all_aspects = {
             "func_name", "repo", "path", "docstring", 
             "code", "url", "language", "partition"
