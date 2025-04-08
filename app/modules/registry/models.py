@@ -4,11 +4,23 @@ from typing import List, Optional
 
 class RepoInfo(BaseModel):
     name: str
-    description: Optional[str] = None
+    full_name: str
+    description: Optional[str]
+    url: str
     stars: int
     forks: int
-    url: str
+    language: Optional[str]
+    license: Optional[str]
+    readme_preview: str
+
+class RegistryRequest(BaseModel):
+    query: str
+    limit: int = 10
+    sort: str = "stars"
+    order: str = "desc"
 
 class RegistryResponse(BaseModel):
+    query: str
     repos: List[RepoInfo]
     count: int
+    from_cache: bool
