@@ -1,0 +1,34 @@
+GET http://localhost:8000/
+
+__________________________________________
+
+POST http://localhost:8000/registry/build
+Content-Type: application/json
+{
+    "query": "microservice language:python",
+    "limit": 5,
+    "min_stars": 50
+}
+
+__________________________________________
+
+POST http://localhost:8000/registry/build
+Content-Type: application/json
+{
+    "query": "ZeroMQ socket communication",
+    "workflow": "guided",
+    "registry": "servio_data.jsonl"
+}
+
+__________________________________________
+
+POST http://localhost:8000/query
+Content-Type: application/json
+{
+    "query": "socket shutdown",
+    "workflow": "direct",
+    "aspects": {
+        "docstring": "router socket",
+        "func_name": "close"
+    }
+}
