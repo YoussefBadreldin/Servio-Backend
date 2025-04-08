@@ -1,3 +1,4 @@
+# SERVIO-BACKEND/app/guided/query.py
 from langchain.chat_models import init_chat_model
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
