@@ -4,6 +4,7 @@ from pathlib import Path
 from app.utils.nlp_utils import expand_query
 from app.utils.file_handlers import load_registry
 from app.core.exceptions import NotFoundException
+from app.modules.guided.models import GuidedRequest, GuidedResponse
 
 class GuidedProcessor:
     def __init__(self):
