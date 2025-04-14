@@ -1,3 +1,4 @@
+# servio-backend/app/shared/__init__.py
 from .exceptions import (
     ServioException,
     ServiceDiscoveryError,

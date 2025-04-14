@@ -1,3 +1,4 @@
+# servio-backend/app/shared/exceptions.py
 class ServioException(Exception):
     """Base exception for Servio application"""
     pass

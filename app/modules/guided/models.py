@@ -1,3 +1,4 @@
+# servio-backend/app/modules/guided/models.py
 from pydantic import BaseModel
 
 class QueryRequest(BaseModel):

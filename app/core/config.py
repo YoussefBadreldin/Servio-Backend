@@ -1,3 +1,4 @@
+# servio-backend/app/core/config.py
 from pydantic_settings import BaseSettings
 from pydantic import Field, AnyHttpUrl  
 from typing import List, Union

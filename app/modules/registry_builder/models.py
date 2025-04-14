@@ -1,3 +1,4 @@
+# servio-backend/app/modules/registry_builder/models.py
 from pydantic import BaseModel
 from typing import Optional
 
