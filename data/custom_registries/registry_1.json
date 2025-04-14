@@ -1,0 +1,57 @@
+[
+    {
+        "name": "serve",
+        "full_name": "jina-ai/serve",
+        "description": "\u2601\ufe0f Build multimodal AI applications with cloud-native stack",
+        "url": "https://github.com/jina-ai/serve",
+        "stars": 21513,
+        "forks": 2222,
+        "language": "Python",
+        "license": "Apache License 2.0",
+        "readme": null
+    },
+    {
+        "name": "falcon",
+        "full_name": "falconry/falcon",
+        "description": "The no-magic web API and microservices framework for Python developers, with an emphasis on reliability and performance at scale.",
+        "url": "https://github.com/falconry/falcon",
+        "stars": 9631,
+        "forks": 953,
+        "language": "Python",
+        "license": "Apache License 2.0",
+        "readme": null
+    },
+    {
+        "name": "nameko",
+        "full_name": "nameko/nameko",
+        "description": "Python framework for building microservices",
+        "url": "https://github.com/nameko/nameko",
+        "stars": 4729,
+        "forks": 470,
+        "language": "Python",
+        "license": "Apache License 2.0",
+        "readme": null
+    },
+    {
+        "name": "emissary",
+        "full_name": "emissary-ingress/emissary",
+        "description": "open source Kubernetes-native API gateway for microservices built on the Envoy Proxy",
+        "url": "https://github.com/emissary-ingress/emissary",
+        "stars": 4423,
+        "forks": 688,
+        "language": "Python",
+        "license": "Apache License 2.0",
+        "readme": null
+    },
+    {
+        "name": "microservices-demo",
+        "full_name": "microservices-demo/microservices-demo",
+        "description": "Deployment scripts & config for Sock Shop",
+        "url": "https://github.com/microservices-demo/microservices-demo",
+        "stars": 3681,
+        "forks": 2859,
+        "language": "Python",
+        "license": "Apache License 2.0",
+        "readme": null
+    }
+]

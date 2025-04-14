@@ -1,24 +1,16 @@
 from pydantic import BaseModel
-from typing import Optional, List, Dict, Union
-from enum import Enum
-
-class DiscoveryMode(str, Enum):
-    PARALLEL = "parallel"
-    SEQUENTIAL = "sequential"
+from typing import List, Optional, Dict
 
 class Aspect(BaseModel):
     key: str
     value: str
 
-class GenerateXmlRequest(BaseModel):
+class CreateXmlRequest(BaseModel):
     aspects: List[Aspect]
 
-class DirectDiscoveryRequest(BaseModel):
+class DiscoveryRequest(BaseModel):
     query: str
-    mode: DiscoveryMode = DiscoveryMode.PARALLEL
-    top_n: int = 5
-    xml_content: Optional[str] = None  # For ready XML
-    aspects: Optional[List[Aspect]] = None  # For generated aspects
+    xml_path: str
 
 class ServiceMatch(BaseModel):
     func_name: str
@@ -26,16 +18,7 @@ class ServiceMatch(BaseModel):
     path: str
     docstring: str
     url: str
-    score: float
-    matched_aspects: List[str]
+    similarity_score: float
 
-class DiscoveryResult(BaseModel):
-    query: str
-    mode: str
+class DiscoveryResponse(BaseModel):
     matches: List[ServiceMatch]
-    execution_time_ms: float
-
-class DirectDiscoveryResponse(BaseModel):
-    parallel_results: Optional[DiscoveryResult] = None
-    sequential_results: Optional[DiscoveryResult] = None
-    suggested_aspects: List[str]

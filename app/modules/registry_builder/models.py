@@ -1,14 +1,23 @@
 from pydantic import BaseModel
-from typing import Dict, List
+from typing import Optional
 
-class ServiceData(BaseModel):
-    func_name: str
-    docstring: str
-    repo: List[str]
+class GitHubSearchRequest(BaseModel):
+    query: str
+    limit: Optional[int] = 10
+
+class RepositoryInfo(BaseModel):
+    name: str
+    full_name: str
+    description: Optional[str]
     url: str
-    metadata: Dict = {}
+    stars: int
+    forks: int
+    language: Optional[str]
+    license: Optional[str]
+    readme: Optional[str]
 
-class BuildResponse(BaseModel):
-    status: str
-    new_services: int
-    total_services: int
+class RegistryBuildResponse(BaseModel):
+    success: bool
+    message: str
+    filename: Optional[str]
+    repositories: Optional[list[RepositoryInfo]]

@@ -17,3 +17,15 @@ class LLMException(ServioException):
 class DirectMatchError(ServioException):
     """Exception for LLM-related errors"""
     pass
+
+class ServiceDiscoveryError(Exception):
+    """Custom exception for service discovery errors"""
+    pass
+
+class DirectModuleError(Exception):
+    """Custom exception for direct module errors"""
+    pass
+
+class RegistryBuilderError(Exception):
+    """Custom exception for direct module errors"""
+    pass

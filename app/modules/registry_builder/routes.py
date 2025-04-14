@@ -1,31 +1,32 @@
 from fastapi import APIRouter, HTTPException
-from .models import ServiceData, BuildResponse
+from .models import GitHubSearchRequest, RegistryBuildResponse
 from .service import RegistryBuilderService
+from ...shared.exceptions import RegistryBuilderError
+import os
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/api/registry_builder",
+    tags=["registry_builder"],
+    responses={404: {"description": "Not found"}},
+)
+
 service = RegistryBuilderService()
 
-@router.post("/add-service")
-async def add_service(service_data: ServiceData):
+@router.post("/build", response_model=RegistryBuildResponse)
+async def build_registry(request: GitHubSearchRequest):
     try:
-        return await service.add_service(service_data.dict())
+        result = service.build_registry(request.query, request.limit)
+        return result
+    except RegistryBuilderError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(
-            status_code=400,
-            detail=str(e)
-        )
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
-@router.post("/rebuild")
-async def rebuild_registry():
+@router.get("/list_registries")
+async def list_registries():
     try:
-        result = await service.rebuild_registry()
-        return BuildResponse(
-            status="success",
-            new_services=0,
-            total_services=0
-        )
+        registry_dir = "data/custom_registries"
+        registries = [f for f in os.listdir(registry_dir) if f.endswith('.json')]
+        return {"registries": registries}
     except Exception as e:
-        raise HTTPException(
-            status_code=501,
-            detail="Registry rebuild not implemented yet"
-        )
+        raise HTTPException(status_code=500, detail=str(e))

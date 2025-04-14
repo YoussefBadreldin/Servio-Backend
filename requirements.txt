@@ -13,3 +13,5 @@ nltk
 python-multipart
 langchain
 langchain-huggingface
+github3
+requests
