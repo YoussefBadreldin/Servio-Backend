@@ -21,9 +21,11 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 class GuidedService:
+    DEFAULT_REGISTRY = "data/servio_data.jsonl"
+    
     def __init__(self):
-        """Initialize the guided service with consistent configuration."""
-        self.service_registry_file = Path("data/servio_data.jsonl")
+        """Initialize with configurable registry path"""
+        self._registry_path = self.DEFAULT_REGISTRY
         self.faiss_index_path = Path("data/faiss_index")
         self.index_name = "servio_index"
         self.embeddings_model = "all-MiniLM-L6-v2"
@@ -42,22 +44,43 @@ class GuidedService:
         
         self.initialize_components()
 
+    def _validate_registry(self, path):
+        """Validate registry file exists"""
+        if not Path(path).exists():
+            raise ServiceDiscoveryError(f"Registry file not found at: {path}")
+
+    @property
+    def registry_path(self):
+        return self._registry_path
+
+    def set_registry_path(self, path: str):
+        """Set registry path and reinitialize components"""
+        self._validate_registry(path)
+        self._registry_path = path
+        self.initialize_components()
+
+    def reset_to_default(self):
+        """Reset to default registry"""
+        self._validate_registry(self.DEFAULT_REGISTRY)
+        self._registry_path = self.DEFAULT_REGISTRY
+        self.initialize_components()
+
     def initialize_components(self) -> None:
-        """Initialize all service components with error handling."""
+        """Initialize all service components with the current registry"""
         try:
             # Verify data file exists
-            if not self.service_registry_file.exists():
-                raise FileNotFoundError(f"Service registry file not found: {self.service_registry_file}")
+            if not Path(self._registry_path).exists():
+                raise FileNotFoundError(f"Registry file not found: {self._registry_path}")
             
             # Load documents
             self.documents = self._load_and_validate_documents()
-            logger.info(f"Loaded {len(self.documents)} service registry entries")
+            logger.info(f"Loaded {len(self.documents)} service registry entries from {self._registry_path}")
             
             # Initialize embeddings
             self.embeddings = HuggingFaceEmbeddings(
                 model_name=self.embeddings_model,
-                model_kwargs={'device': 'cpu'},  # Ensure consistent device
-                encode_kwargs={'normalize_embeddings': True}  # Normalize for better similarity
+                model_kwargs={'device': 'cpu'},
+                encode_kwargs={'normalize_embeddings': True}
             )
             
             # Initialize vector store
@@ -84,52 +107,6 @@ class GuidedService:
         except Exception as e:
             logger.error(f"Initialization failed: {str(e)}")
             raise ServiceDiscoveryError(f"Service initialization failed: {str(e)}")
-
-    def _load_and_validate_documents(self) -> List[Document]:
-        """Load and validate documents with consistent sorting and formatting."""
-        documents = []
-        try:
-            with open(self.service_registry_file, 'r') as f:
-                lines = [line.strip() for line in f if line.strip()]
-                
-                # Sort by function name for consistency
-                lines_sorted = sorted(
-                    lines,
-                    key=lambda x: json.loads(x).get('func_name', '').lower()
-                )
-                
-                for line in lines_sorted:
-                    data = json.loads(line)
-                    
-                    # Validate required fields
-                    if not data.get('func_name'):
-                        logger.warning(f"Skipping document missing func_name: {data}")
-                        continue
-                        
-                    # Create consistent document format
-                    content_parts = [
-                        f"Service Name: {data.get('func_name', 'N/A')}",
-                        f"Description: {data.get('docstring', 'No description provided')}",
-                        f"Tags: {', '.join(sorted(data.get('repo', [])))}",
-                        f"URL: {data.get('url', 'N/A')}"
-                    ]
-                    
-                    documents.append(
-                        Document(
-                            page_content="\n".join(content_parts),
-                            metadata=data
-                        )
-                    )
-                    
-            if not documents:
-                raise ValueError("No valid documents found in registry")
-                
-            return documents
-            
-        except json.JSONDecodeError as e:
-            raise ServiceDiscoveryError(f"Invalid JSON in registry file: {str(e)}")
-        except Exception as e:
-            raise ServiceDiscoveryError(f"Document loading failed: {str(e)}")
 
     def _initialize_vector_store(self) -> FAISS:
         """Initialize or load the FAISS vector store with validation."""
@@ -177,6 +154,49 @@ class GuidedService:
         except Exception as e:
             raise ServiceDiscoveryError(f"Vector store initialization failed: {str(e)}")
 
+    def _load_and_validate_documents(self) -> List[Document]:
+        """Load documents from current registry path"""
+        documents = []
+        try:
+            with open(self._registry_path, 'r') as f:
+                lines = [line.strip() for line in f if line.strip()]
+                
+                lines_sorted = sorted(
+                    lines,
+                    key=lambda x: json.loads(x).get('func_name', '').lower()
+                )
+                
+                for line in lines_sorted:
+                    data = json.loads(line)
+                    
+                    if not data.get('func_name'):
+                        logger.warning(f"Skipping document missing func_name: {data}")
+                        continue
+                        
+                    content_parts = [
+                        f"Service Name: {data.get('func_name', 'N/A')}",
+                        f"Description: {data.get('docstring', 'No description provided')}",
+                        f"Tags: {', '.join(sorted(data.get('repo', [])))}",
+                        f"URL: {data.get('url', 'N/A')}"
+                    ]
+                    
+                    documents.append(
+                        Document(
+                            page_content="\n".join(content_parts),
+                            metadata=data
+                        )
+                    )
+                    
+            if not documents:
+                raise ValueError("No valid documents found in registry")
+                
+            return documents
+            
+        except json.JSONDecodeError as e:
+            raise ServiceDiscoveryError(f"Invalid JSON in registry file: {str(e)}")
+        except Exception as e:
+            raise ServiceDiscoveryError(f"Document loading failed: {str(e)}")
+
     def _expand_query(self, query: str) -> str:
         """Expand the query with domain-specific terms for better retrieval."""
         query_lower = query.lower()
@@ -217,7 +237,7 @@ class GuidedService:
         
         return [round(100 * (exp / sum_exps), 1) for exp in exps]
 
-    def _format_recommendation_context(self, docs: List[Document]) -> str:
+    def _format_recommendation_context(self, docs: List[Tuple[Document, float]]) -> str:
         """Format the context for LLM in a consistent way."""
         return "\n\n".join(
             f"### Service {i+1}\n"
@@ -258,11 +278,9 @@ class GuidedService:
             
             # Retrieve documents with scores
             expanded_query = self._expand_query(user_query)
-            retrieved_docs_with_scores: List[Tuple[Document, float]] = (
-                self.vectorstore.similarity_search_with_score(
-                    expanded_query,
-                    k=self.top_k
-                )
+            retrieved_docs_with_scores = self.vectorstore.similarity_search_with_score(
+                expanded_query,
+                k=self.top_k
             )
             
             if not retrieved_docs_with_scores:
@@ -283,7 +301,7 @@ class GuidedService:
                     "confidence": confidence,
                     "description": doc.metadata.get("docstring", ""),
                     "url": doc.metadata.get("url", ""),
-                    "similarity_score": float(score)  # For debugging
+                    "similarity_score": float(score)
                 })
             
             # Generate LLM response
@@ -307,7 +325,7 @@ class GuidedService:
             return {
                 "response_text": llm_response.content,
                 "recommendations": recommendations,
-                "debug_info": {  # Optional debugging info
+                "debug_info": {
                     "expanded_query": expanded_query,
                     "raw_scores": [float(s) for s in scores]
                 }

@@ -17,6 +17,8 @@ service = RegistryBuilderService()
 async def build_registry(request: GitHubSearchRequest):
     try:
         result = service.build_registry(request.query, request.limit)
+        if not result["success"]:
+            raise RegistryBuilderError(result["message"])
         return result
     except RegistryBuilderError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -27,7 +29,17 @@ async def build_registry(request: GitHubSearchRequest):
 async def list_registries():
     try:
         registry_dir = "data/custom_registries"
-        registries = [f for f in os.listdir(registry_dir) if f.endswith('.json')]
+        registries = [f for f in os.listdir(registry_dir) if f.endswith('.jsonl')]
         return {"registries": registries}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get("/suggestions")
+async def get_registry_suggestions():
+    try:
+        return {
+            "success": True,
+            "registries": service.get_existing_registries()
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))    

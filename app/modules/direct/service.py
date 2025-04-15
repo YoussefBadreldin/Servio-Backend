@@ -2,7 +2,7 @@
 import json
 import os
 import xml.etree.ElementTree as ET
-from typing import List, Dict
+from typing import List, Dict, Optional
 import nltk
 from nltk.corpus import wordnet as wn
 import uuid
@@ -14,10 +14,31 @@ nltk.download('omw-1.4', quiet=True, force=True)
 nltk.download('punkt', quiet=True, force=True)
 
 class DirectService:
+    DEFAULT_REGISTRY = "data/servio_data.jsonl"
+    
     def __init__(self):
-        self.registry_path = "data/servio_data.jsonl"
+        self._registry_path = self.DEFAULT_REGISTRY
         self.xml_storage_path = "data/xml_aspects"
         os.makedirs(self.xml_storage_path, exist_ok=True)
+        self._validate_registry(self._registry_path)
+        
+    def _validate_registry(self, path):
+        if not os.path.exists(path):
+            raise DirectModuleError(f"Registry file not found at: {path}")
+
+    @property
+    def registry_path(self):
+        return self._registry_path
+
+    def set_registry_path(self, path: str):
+        """Set registry path with validation"""
+        self._validate_registry(path)
+        self._registry_path = path
+
+    def reset_to_default(self):
+        """Reset to default registry"""
+        self._validate_registry(self.DEFAULT_REGISTRY)
+        self._registry_path = self.DEFAULT_REGISTRY
         
     def preprocess_text(self, text: str) -> str:
         return " ".join(text.lower().split())

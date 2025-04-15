@@ -1,15 +1,15 @@
 # servio-backend/app/modules/registry_builder/models.py
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class GitHubSearchRequest(BaseModel):
     query: str
-    limit: Optional[int] = 10
+    limit: Optional[int] = 5
 
 class RepositoryInfo(BaseModel):
-    name: str
+    func_name: str
     full_name: str
-    description: Optional[str]
+    docstring: Optional[str]
     url: str
     stars: int
     forks: int
@@ -20,5 +20,5 @@ class RepositoryInfo(BaseModel):
 class RegistryBuildResponse(BaseModel):
     success: bool
     message: str
-    filename: Optional[str]
-    repositories: Optional[list[RepositoryInfo]]
+    registry_path: str  # Changed from filename to registry_path
+    repositories: Optional[List[RepositoryInfo]]

@@ -71,3 +71,21 @@ async def discover_services(request: DiscoveryRequest):
         raise HTTPException(status_code=500, detail=str(e))
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="XML file not found")
+    
+# servio-backend/app/modules/direct/routes.py
+@router.post("/set-registry")
+async def set_registry_path(request: dict):
+    try:
+        if request.get("use_default", False):
+            service.reset_to_default()
+        else:
+            service.set_registry_path(request["registry_path"])
+        return {
+            "success": True,
+            "message": "Registry path updated successfully",
+            "registry_path": service.registry_path
+        }
+    except DirectModuleError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update registry: {str(e)}")
