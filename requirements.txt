@@ -16,3 +16,8 @@ langchain
 langchain-huggingface
 github3
 requests
+pytesseract
+pillow
+PyPDF2
+pdf2image
+poppler-utils 
