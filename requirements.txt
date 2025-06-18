@@ -1,32 +1,28 @@
 # servio-backend/requirements.txt
-# Core dependencies
-fastapi>=0.115.0
-uvicorn>=0.34.0
-python-dotenv>=1.1.0
-pydantic>=2.11.7
-pydantic_settings>=2.9.1
-python-multipart>=0.0.20
-requests>=2.31.0
+# Core dependencies - minimal set
+fastapi==0.115.0
+uvicorn==0.34.0
+python-dotenv==1.1.0
+pydantic==2.11.7
+pydantic_settings==2.9.1
+python-multipart==0.0.20
+requests==2.31.0
+pymongo==4.6.1
 
-# LangChain dependencies
-langchain-core>=0.3.65
-langchain-community>=0.3.25
-langchain-groq>=0.3.2
-langchain>=0.3.25
-langchain-huggingface>=0.3.0
+# Essential LangChain components
+langchain-core==0.3.65
+langchain-community==0.3.25
+langchain-groq==0.3.2
 
-# Text processing
-nltk>=3.9.1
-sentence-transformers>=4.1.0
+# Basic text processing
+nltk==3.9.1
 
-# Document processing
-PyPDF2>=3.0.0
-pdf2image>=1.17.0
-pytesseract>=0.3.10
-pillow>=10.2.0
+# Basic document processing
+PyPDF2==3.0.0
+pillow==10.2.0
 
 # GitHub integration
-PyGithub>=2.1.1
+PyGithub==2.1.1
 
 # Optional: Uncomment these if needed for specific features
 # faiss-cpu>=1.11.0

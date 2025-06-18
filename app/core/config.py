@@ -9,6 +9,11 @@ class Settings(BaseSettings):
     FAISS_INDEX_PATH: str = Field("data/faiss_index", env="FAISS_INDEX_PATH")
     EMBEDDING_MODEL: str = Field("all-MiniLM-L6-v2", env="EMBEDDING_MODEL")
     CORS_ORIGINS: List[Union[str, AnyHttpUrl]] = Field(["*"], env="CORS_ORIGINS")
+    
+    # MongoDB settings
+    MONGODB_URI: str = Field("mongodb://localhost:27017", env="MONGODB_URI")
+    MONGODB_DB: str = Field("servio", env="MONGODB_DB")
+    MONGODB_COLLECTION: str = Field("messages", env="MONGODB_COLLECTION")
 
     class Config:
         env_file = ".env"
