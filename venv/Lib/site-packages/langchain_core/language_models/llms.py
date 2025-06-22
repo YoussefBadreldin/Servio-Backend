@@ -103,7 +103,9 @@ def create_base_retry_decorator(
                 try:
                     loop = asyncio.get_event_loop()
                     if loop.is_running():
-                        loop.create_task(coro)
+                        # TODO: Fix RUF006 - this task should have a reference
+                        #  and be awaited somewhere
+                        loop.create_task(coro)  # noqa: RUF006
                     else:
                         asyncio.run(coro)
                 except Exception as e:
@@ -325,18 +327,18 @@ class BaseLLM(BaseLanguageModel[str], ABC):
         """Get the input type for this runnable."""
         return str
 
-    def _convert_input(self, input: LanguageModelInput) -> PromptValue:
-        if isinstance(input, PromptValue):
-            return input
-        if isinstance(input, str):
-            return StringPromptValue(text=input)
-        if isinstance(input, Sequence):
-            return ChatPromptValue(messages=convert_to_messages(input))
+    def _convert_input(self, model_input: LanguageModelInput) -> PromptValue:
+        if isinstance(model_input, PromptValue):
+            return model_input
+        if isinstance(model_input, str):
+            return StringPromptValue(text=model_input)
+        if isinstance(model_input, Sequence):
+            return ChatPromptValue(messages=convert_to_messages(model_input))
         msg = (
-            f"Invalid input type {type(input)}. "
+            f"Invalid input type {type(model_input)}. "
             "Must be a PromptValue, str, or list of BaseMessages."
         )
-        raise ValueError(msg)  # noqa: TRY004
+        raise ValueError(msg)
 
     def _get_ls_params(
         self,
@@ -438,7 +440,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
         if max_concurrency is None:
             try:
                 llm_result = self.generate_prompt(
-                    [self._convert_input(input) for input in inputs],
+                    [self._convert_input(input_) for input_ in inputs],
                     callbacks=[c.get("callbacks") for c in config],
                     tags=[c.get("tags") for c in config],
                     metadata=[c.get("metadata") for c in config],
@@ -455,7 +457,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
                 inputs[i : i + max_concurrency]
                 for i in range(0, len(inputs), max_concurrency)
             ]
-            config = [{**c, "max_concurrency": None} for c in config]  # type: ignore[misc]
+            config = [{**c, "max_concurrency": None} for c in config]
             return [
                 output
                 for i, batch in enumerate(batches)
@@ -484,7 +486,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
         if max_concurrency is None:
             try:
                 llm_result = await self.agenerate_prompt(
-                    [self._convert_input(input) for input in inputs],
+                    [self._convert_input(input_) for input_ in inputs],
                     callbacks=[c.get("callbacks") for c in config],
                     tags=[c.get("tags") for c in config],
                     metadata=[c.get("metadata") for c in config],
@@ -501,7 +503,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
                 inputs[i : i + max_concurrency]
                 for i in range(0, len(inputs), max_concurrency)
             ]
-            config = [{**c, "max_concurrency": None} for c in config]  # type: ignore[misc]
+            config = [{**c, "max_concurrency": None} for c in config]
             return [
                 output
                 for i, batch in enumerate(batches)
@@ -522,7 +524,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
         stop: Optional[list[str]] = None,
         **kwargs: Any,
     ) -> Iterator[str]:
-        if type(self)._stream == BaseLLM._stream:
+        if type(self)._stream == BaseLLM._stream:  # noqa: SLF001
             # model doesn't implement streaming, so use default implementation
             yield self.invoke(input, config=config, stop=stop, **kwargs)
         else:
@@ -590,8 +592,8 @@ class BaseLLM(BaseLanguageModel[str], ABC):
         **kwargs: Any,
     ) -> AsyncIterator[str]:
         if (
-            type(self)._astream is BaseLLM._astream
-            and type(self)._stream is BaseLLM._stream
+            type(self)._astream is BaseLLM._astream  # noqa: SLF001
+            and type(self)._stream is BaseLLM._stream  # noqa: SLF001
         ):
             yield await self.ainvoke(input, config=config, stop=stop, **kwargs)
             return
@@ -746,7 +748,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
                 None,
                 next,
                 iterator,
-                done,  # type: ignore[call-arg, arg-type]
+                done,
             )
             if item is done:
                 break
@@ -857,7 +859,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
         """
         if not isinstance(prompts, list):
             msg = (
-                "Argument 'prompts' is expected to be of type List[str], received"
+                "Argument 'prompts' is expected to be of type list[str], received"
                 f" argument of type {type(prompts)}."
             )
             raise ValueError(msg)  # noqa: TRY004
@@ -1231,7 +1233,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
                 stop,
                 run_managers,  # type: ignore[arg-type]
                 new_arg_supported=bool(new_arg_supported),
-                **kwargs,  # type: ignore[arg-type]
+                **kwargs,
             )
         if len(missing_prompts) > 0:
             run_managers = await asyncio.gather(
@@ -1253,7 +1255,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
                 stop,
                 run_managers,  # type: ignore[arg-type]
                 new_arg_supported=bool(new_arg_supported),
-                **kwargs,  # type: ignore[arg-type]
+                **kwargs,
             )
             llm_output = await aupdate_cache(
                 self.cache,
@@ -1399,6 +1401,7 @@ class BaseLLM(BaseLanguageModel[str], ABC):
     def _llm_type(self) -> str:
         """Return type of llm."""
 
+    @override
     def dict(self, **kwargs: Any) -> dict:
         """Return a dictionary of the LLM."""
         starter_dict = dict(self._identifying_params)

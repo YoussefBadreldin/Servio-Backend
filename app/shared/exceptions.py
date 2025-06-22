@@ -30,7 +30,3 @@ class DirectModuleError(Exception):
 class RegistryBuilderError(Exception):
     """Custom exception for direct module errors"""
     pass
-
-class logger(Exception):
-    """Custom exception for direct module errors"""
-    pass

@@ -4,20 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.modules.guided.routes import router as guided_router
 from app.modules.direct.routes import router as direct_router
 from app.modules.registry_builder.routes import router as registry_router
-import os
 
 app = FastAPI()
-
-# Get allowed origins from environment variable or use default
-ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"],  # Allows all origins (for development only)
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["*"],
+    allow_methods=["*"],  # Allows all methods
+    allow_headers=["*"],  # Allows all headers
 )
 
 app.include_router(guided_router)
