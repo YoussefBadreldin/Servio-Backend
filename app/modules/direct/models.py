@@ -23,3 +23,15 @@ class ServiceMatch(BaseModel):
 
 class DiscoveryResponse(BaseModel):
     matches: List[ServiceMatch]
+
+class MCPDiscoveryRequest(BaseModel):
+    user_requirements: dict
+
+class MCPServiceMatch(BaseModel):
+    rank: int
+    service_name: str
+    matched_features: list
+    reason_for_match: str
+
+class MCPDiscoveryResponse(BaseModel):
+    matches: list[MCPServiceMatch]

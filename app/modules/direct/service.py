@@ -8,6 +8,9 @@ from nltk.corpus import wordnet as wn
 import uuid
 from pathlib import Path
 from ...shared.exceptions import DirectModuleError
+import requests
+import hashlib
+import re
 
 nltk.download('wordnet', quiet=True, force=True)
 nltk.download('omw-1.4', quiet=True, force=True)
@@ -129,3 +132,70 @@ class DirectService:
             return [{"similarity_score": score, **entry} for score, entry in scored_entries[:top_n]]
         except Exception as e:
             raise DirectModuleError(f"Service matching failed: {str(e)}")
+
+    def mcp_discover(self, user_requirements: dict) -> dict:
+        # 1. Enrich requirements (mock)
+        enriched = user_requirements  # TODO: Replace with LLM call
+
+        # 2. Extract aspects (mock)
+        aspects = ["transaction", "balance", "money", "username"]  # TODO: Replace with LLM call
+
+        # 3. Load public APIs (real)
+        def check_api_alive(url, timeout=3):
+            try:
+                r = requests.get(url, timeout=timeout)
+                return r.status_code == 200
+            except:
+                return False
+
+        def load_public_apis(limit=20):
+            response = requests.get("https://api.apis.guru/v2/list.json")
+            all_apis = response.json()
+            services = []
+            for i, (name, data) in enumerate(all_apis.items()):
+                if i >= limit:
+                    break
+                versions = data.get("versions", {})
+                latest_version = list(versions.keys())[-1]
+                api_info = versions[latest_version]
+                try:
+                    spec_url = api_info.get("swaggerUrl")
+                    if spec_url and check_api_alive(spec_url):
+                        spec_response = requests.get(spec_url, timeout=5)
+                        if spec_response.status_code == 200:
+                            spec = spec_response.json()
+                            title = spec.get("info", {}).get("title", name)
+                            description = spec.get("info", {}).get("description", "")
+                            enhanced_features = []
+                            for path, ops in spec.get("paths", {}).items():
+                                for method, operation in ops.items():
+                                    feature = {
+                                        "path": path,
+                                        "method": method.upper(),
+                                        "summary": operation.get("summary", ""),
+                                        "operationId": operation.get("operationId", ""),
+                                        "tags": operation.get("tags", [])
+                                    }
+                                    enhanced_features.append(feature)
+                            services.append({
+                                "service_name": title,
+                                "description": description,
+                                "features": enhanced_features[:10]
+                            })
+                except:
+                    continue
+            return services
+
+        services = load_public_apis(limit=20)
+
+        # 4. Rank top 5 services (mock)
+        matches = []
+        for i, s in enumerate(services[:5]):
+            matches.append({
+                "rank": i+1,
+                "service_name": s["service_name"],
+                "matched_features": [f["summary"] for f in s["features"] if f["summary"]],
+                "reason_for_match": f"Mock reason for {s['service_name']}"
+            })
+
+        return {"matches": matches}

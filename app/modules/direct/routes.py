@@ -4,7 +4,8 @@ from .models import (
     CreateXmlRequest,
     DiscoveryRequest,
     DiscoveryResponse,
-    Aspect
+    Aspect,
+    MCPDiscoveryRequest, MCPDiscoveryResponse
 )
 from .service import DirectService
 from ...shared.exceptions import DirectModuleError
@@ -89,3 +90,8 @@ async def set_registry_path(request: dict):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to update registry: {str(e)}")
+
+@router.post("/mcp-discover", response_model=MCPDiscoveryResponse)
+async def mcp_discover(request: MCPDiscoveryRequest):
+    result = service.mcp_discover(request.user_requirements)
+    return result

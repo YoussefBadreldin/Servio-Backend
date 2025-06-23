@@ -190,7 +190,7 @@ POST http://localhost:8000/api/registry_builder/build
 Content-Type: application/json
 {
   "query": "microservice language:python",
-?  "limit": 5
+?  "limit": 10000
 }
 {
     "success": true,
